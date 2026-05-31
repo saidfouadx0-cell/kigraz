@@ -1,7 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Clock, ArrowRight } from "lucide-react";
 import { getBlogPosts } from "@/lib/db";
 import { mockBlogPosts } from "@/lib/mock-data";
+
+export const metadata: Metadata = {
+  title: "Blog – KI-Tipps & Neuigkeiten für Grazer Unternehmen",
+  description:
+    "Praxis-Tipps, Guides und aktuelle Neuigkeiten rund um Künstliche Intelligenz für österreichische KMUs. KI-Förderungen, Anwendungsfälle und mehr.",
+  alternates: { canonical: "https://kigraz.com/blog" },
+  openGraph: {
+    title: "KI Graz Blog – Praxis-Tipps für KMUs",
+    description: "Aktuelle Artikel zu KI-Förderungen, Anwendungsfällen und Digitalisierung für Grazer Unternehmen.",
+    type: "website",
+    url: "https://kigraz.com/blog",
+  },
+};
 
 export default async function BlogPage() {
   const posts = await getBlogPosts().catch(() => mockBlogPosts);

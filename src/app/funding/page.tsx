@@ -1,5 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Euro, CheckCircle, ArrowRight, ExternalLink } from "lucide-react";
+
+export const metadata: Metadata = {
+  title: "KI-Förderungen für österreichische KMUs – bis zu 75%",
+  description:
+    "Erfahren Sie, wie Sie als österreichisches KMU bis zu 75% Förderung für KI-Projekte erhalten. KMU Digital, SFG, Horizon Europe – wir erklären alle Programme.",
+  keywords: ["KI Förderung", "KMU Digital", "SFG Förderung", "KI Investition Österreich", "aws Förderung"],
+  alternates: { canonical: "https://kigraz.com/funding" },
+  openGraph: {
+    title: "KI-Förderungen für österreichische KMUs – bis zu 75%",
+    description: "KMU Digital, SFG und Horizon Europe: Holen Sie sich bis zu 75% Förderung für Ihr KI-Projekt.",
+    type: "website",
+    url: "https://kigraz.com/funding",
+  },
+};
 
 const fundingPrograms = [
   {

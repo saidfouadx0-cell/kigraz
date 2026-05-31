@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle, Star, Globe, Mail, Phone, MapPin, ArrowLeft } from "lucide-react";
@@ -14,13 +15,66 @@ export async function generateStaticParams() {
   return providers.map((p) => ({ slug: p.slug }));
 }
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const provider = await getProviderBySlug(slug);
+  if (!provider) return {};
+
+  const url = `https://kigraz.com/providers/${provider.slug}`;
+  return {
+    title: `${provider.name} – KI-Anbieter in Graz`,
+    description: provider.short_description,
+    keywords: [provider.name, ...provider.categories, "KI Graz", "Steiermark"],
+    alternates: { canonical: url },
+    openGraph: {
+      type: "website",
+      url,
+      title: `${provider.name} – KI-Anbieter in Graz`,
+      description: provider.short_description,
+    },
+  };
+}
+
 export default async function ProviderPage({ params }: Props) {
   const { slug } = await params;
   const provider = await getProviderBySlug(slug);
   if (!provider) notFound();
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    name: provider.name,
+    description: provider.description,
+    url: provider.website ?? `https://kigraz.com/providers/${provider.slug}`,
+    email: provider.email,
+    telephone: provider.phone,
+    address: provider.address
+      ? {
+          "@type": "PostalAddress",
+          streetAddress: provider.address,
+          addressLocality: "Graz",
+          addressRegion: "Steiermark",
+          addressCountry: "AT",
+        }
+      : undefined,
+    aggregateRating: provider.rating
+      ? {
+          "@type": "AggregateRating",
+          ratingValue: provider.rating,
+          reviewCount: provider.review_count ?? 1,
+          bestRating: 5,
+          worstRating: 1,
+        }
+      : undefined,
+    sameAs: provider.website ? [provider.website] : undefined,
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link
           href="/providers"
