@@ -1,21 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
-import { Building2, Users2, MessageSquare, FileText } from "lucide-react";
+import { Building2, Users2, MessageSquare, FileText, Mail } from "lucide-react";
 
 export const metadata = { title: "Admin – Übersicht | KI Graz" };
 
 async function getStats() {
   const supabase = await createClient();
-  const [providers, applications, quotes, posts] = await Promise.all([
+  const [providers, applications, quotes, posts, messages] = await Promise.all([
     supabase.from("providers").select("id", { count: "exact", head: true }),
     supabase.from("provider_applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
     supabase.from("quote_requests").select("id", { count: "exact", head: true }),
     supabase.from("blog_posts").select("id", { count: "exact", head: true }),
+    supabase.from("contact_messages").select("id", { count: "exact", head: true }),
   ]);
   return {
     providers: providers.count ?? 0,
     pendingApplications: applications.count ?? 0,
     quotes: quotes.count ?? 0,
     posts: posts.count ?? 0,
+    messages: messages.count ?? 0,
   };
 }
 
@@ -36,6 +38,7 @@ export default async function AdminPage() {
     { label: "Offene Bewerbungen", value: stats.pendingApplications, icon: Users2, color: "bg-amber-500" },
     { label: "Angebotsanfragen", value: stats.quotes, icon: MessageSquare, color: "bg-green-500" },
     { label: "Blog-Artikel", value: stats.posts, icon: FileText, color: "bg-purple-500" },
+    { label: "Kontaktanfragen", value: stats.messages, icon: Mail, color: "bg-rose-500" },
   ];
 
   return (

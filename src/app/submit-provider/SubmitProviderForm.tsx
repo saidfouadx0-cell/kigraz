@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { PROVIDER_CATEGORIES } from "@/types";
+import { createClient } from "@/lib/supabase/client";
 
 const benefits = [
   "Kostenlose Listung auf der Plattform",
@@ -23,6 +24,7 @@ export default function SubmitProviderForm() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function toggleCategory(cat: string) {
     setForm((f) => ({
@@ -37,9 +39,18 @@ export default function SubmitProviderForm() {
     e.preventDefault();
     if (form.categories.length === 0) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setSubmitted(true);
-    setLoading(false);
+    setError(null);
+    const supabase = createClient();
+    const { error: dbError } = await supabase.from("provider_applications").insert({
+      ...form,
+      status: "pending",
+    });
+    if (dbError) {
+      setError("Fehler beim Senden. Bitte versuchen Sie es erneut.");
+      setLoading(false);
+    } else {
+      setSubmitted(true);
+    }
   }
 
   if (submitted) {
@@ -96,9 +107,7 @@ export default function SubmitProviderForm() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Unternehmensname *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Unternehmensname *</label>
                     <input
                       required
                       type="text"
@@ -108,9 +117,7 @@ export default function SubmitProviderForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Ansprechperson *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ansprechperson *</label>
                     <input
                       required
                       type="text"
@@ -123,9 +130,7 @@ export default function SubmitProviderForm() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      E-Mail *
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">E-Mail *</label>
                     <input
                       required
                       type="email"
@@ -135,9 +140,7 @@ export default function SubmitProviderForm() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Telefon
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
                     <input
                       type="tel"
                       value={form.phone}
@@ -181,9 +184,7 @@ export default function SubmitProviderForm() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Beschreibung *
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Beschreibung *</label>
                   <textarea
                     required
                     rows={5}
@@ -193,6 +194,8 @@ export default function SubmitProviderForm() {
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                 </div>
+
+                {error && <p className="text-sm text-red-600">{error}</p>}
 
                 <button
                   type="submit"

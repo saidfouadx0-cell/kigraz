@@ -1,19 +1,27 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ContactForm() {
   const [form, setForm] = useState({ name: "", email: "", company: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
-    setSubmitted(true);
-    setLoading(false);
+    setError(null);
+    const supabase = createClient();
+    const { error: dbError } = await supabase.from("contact_messages").insert(form);
+    if (dbError) {
+      setError("Fehler beim Senden. Bitte versuchen Sie es erneut.");
+      setLoading(false);
+    } else {
+      setSubmitted(true);
+    }
   }
 
   return (
@@ -71,7 +79,8 @@ export default function ContactForm() {
           <div className="lg:col-span-2">
             {submitted ? (
               <div className="bg-green-50 rounded-2xl border border-green-200 p-12 text-center">
-                <div className="text-green-600 font-bold text-xl mb-2">Nachricht gesendet!</div>
+                <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                <div className="text-green-700 font-bold text-xl mb-2">Nachricht gesendet!</div>
                 <p className="text-green-700">
                   Vielen Dank für Ihre Nachricht. Wir melden uns innerhalb von 24 Stunden.
                 </p>
@@ -121,6 +130,7 @@ export default function ContactForm() {
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     className="w-full px-4 py-3 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
+                  {error && <p className="text-sm text-red-600">{error}</p>}
                   <button
                     type="submit"
                     disabled={loading}

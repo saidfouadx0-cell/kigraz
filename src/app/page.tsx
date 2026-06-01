@@ -1,15 +1,22 @@
 import Link from "next/link";
-import { CheckCircle, Euro, Users, Zap, ArrowRight, Star } from "lucide-react";
+import { CheckCircle, Euro, Users, Zap, ArrowRight } from "lucide-react";
 import ProviderCard from "@/components/providers/ProviderCard";
 import { getProviders, getBlogPosts } from "@/lib/db";
 import { mockProviders, mockBlogPosts } from "@/lib/mock-data";
+import { createClient } from "@/lib/supabase/server";
 
-const stats = [
-  { value: "12+", label: "Verifizierte Anbieter" },
-  { value: "75%", label: "Max. Förderquote" },
-  { value: "100+", label: "Betreute KMUs" },
-  { value: "Gratis", label: "Nutzung der Plattform" },
-];
+async function getStats() {
+  try {
+    const supabase = await createClient();
+    const { count } = await supabase
+      .from("providers")
+      .select("id", { count: "exact", head: true })
+      .eq("verified", true);
+    return { verifiedProviders: count ?? 6 };
+  } catch {
+    return { verifiedProviders: 6 };
+  }
+}
 
 const features = [
   {
@@ -39,12 +46,19 @@ const features = [
 ];
 
 export default async function HomePage() {
-  const [providers, posts] = await Promise.all([
+  const [providers, posts, stats] = await Promise.all([
     getProviders().catch(() => mockProviders),
     getBlogPosts().catch(() => mockBlogPosts),
+    getStats(),
   ]);
   const featuredProviders = providers.filter((p) => p.featured).slice(0, 3);
   const latestPosts = posts.slice(0, 3);
+  const dynamicStats = [
+    { value: `${stats.verifiedProviders}+`, label: "Verifizierte Anbieter" },
+    { value: "75%", label: "Max. Förderquote" },
+    { value: "100+", label: "Betreute KMUs" },
+    { value: "Gratis", label: "Nutzung der Plattform" },
+  ];
 
   return (
     <>
@@ -85,7 +99,7 @@ export default async function HomePage() {
       <section className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat) => (
+            {dynamicStats.map((stat) => (
               <div key={stat.label} className="text-center">
                 <div className="text-3xl font-bold text-blue-600 mb-1">{stat.value}</div>
                 <div className="text-sm text-gray-500">{stat.label}</div>
