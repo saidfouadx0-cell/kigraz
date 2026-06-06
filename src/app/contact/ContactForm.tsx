@@ -1,14 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Send, CheckCircle, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+
+const faqs = [
+  {
+    question: "Wie lange dauert eine typische KI-Implementierung?",
+    answer:
+      "Das hängt stark vom Umfang ab. Ein einfacher KI-Chatbot oder ein Automatisierungsprojekt ist oft in 4–8 Wochen umgesetzt. Komplexere Projekte wie maßgeschneiderte ML-Modelle oder unternehmensweite Automatisierung dauern in der Regel 3–6 Monate.",
+  },
+  {
+    question: "Was kostet eine Beratung durch KI Graz?",
+    answer:
+      "Die Erstberatung ist für Sie vollständig kostenlos und unverbindlich. Dabei klären wir gemeinsam, welche KI-Lösungen und Förderungen für Ihr Unternehmen in Frage kommen. Erst bei konkreten Projekten besprechen wir Konditionen.",
+  },
+  {
+    question: "Brauche ich technisches Know-how, um KI einzusetzen?",
+    answer:
+      "Nein. Die meisten modernen KI-Tools sind auch ohne Programmierkenntnisse nutzbar. Wir begleiten Sie von der Strategie über die Auswahl der richtigen Tools bis zur Schulung Ihrer Mitarbeiter – ganz nach Ihrem Wissensstand.",
+  },
+  {
+    question: "Welche Förderungen gibt es für KI-Projekte in der Steiermark?",
+    answer:
+      "Österreichische KMUs können über Programme wie FFG, AWS und die Steirische Wirtschaftsförderung (SFG) zwischen 30 % und 75 % ihrer KI-Investition gefördert bekommen. Wir helfen Ihnen kostenlos dabei, die passenden Programme zu identifizieren und den Antrag zu stellen.",
+  },
+  {
+    question: "Ist KI auch für meine Branche geeignet?",
+    answer:
+      "KI findet in nahezu jeder Branche sinnvolle Anwendung – von Produktion und Handel über Gastronomie und Gesundheitswesen bis hin zu Dienstleistung und Handwerk. Der Schlüssel liegt darin, den richtigen Anwendungsfall zu finden. Genau dabei helfen wir Ihnen.",
+  },
+];
 
 export default function ContactForm() {
   const [form, setForm] = useState({ name: "", email: "", company: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -66,12 +95,39 @@ export default function ContactForm() {
               </div>
             </div>
 
+            <div className="bg-white rounded-2xl border border-gray-200 p-6">
+              <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-blue-500" />
+                Erreichbarkeit
+              </h3>
+              <div className="space-y-1 text-sm text-gray-600">
+                <div className="flex justify-between">
+                  <span>Montag – Freitag</span>
+                  <span className="font-medium text-gray-800">09:00 – 18:00</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Samstag – Sonntag</span>
+                  <span className="text-gray-400">Geschlossen</span>
+                </div>
+              </div>
+              <p className="text-xs text-gray-400 mt-3">Antwort per E-Mail innerhalb von 24 Stunden</p>
+            </div>
+
             <div className="bg-blue-50 rounded-2xl border border-blue-100 p-6">
               <h3 className="font-semibold text-blue-900 mb-2">Kostenlose Förderberatung</h3>
               <p className="text-sm text-blue-700">
                 Möchten Sie wissen, welche Förderungen für Ihr KI-Projekt infrage kommen? Schreiben
                 Sie uns — wir beraten Sie kostenlos.
               </p>
+            </div>
+
+            <div className="bg-green-50 rounded-2xl border border-green-100 p-6">
+              <h3 className="font-semibold text-green-900 mb-3">Was passiert nach Ihrer Anfrage?</h3>
+              <ol className="space-y-2 text-sm text-green-800">
+                <li className="flex gap-2"><span className="font-bold shrink-0">1.</span> Wir melden uns innerhalb von 24 Stunden</li>
+                <li className="flex gap-2"><span className="font-bold shrink-0">2.</span> Kostenloses 30-minütiges Erstgespräch</li>
+                <li className="flex gap-2"><span className="font-bold shrink-0">3.</span> Individuelle Empfehlungen für Ihr Unternehmen</li>
+              </ol>
             </div>
           </div>
 
@@ -142,6 +198,34 @@ export default function ContactForm() {
                 </form>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div className="mt-16">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Häufig gestellte Fragen</h2>
+          <p className="text-gray-500 mb-8">Antworten auf die häufigsten Fragen rund um KI-Projekte und unsere Beratung.</p>
+          <div className="space-y-3">
+            {faqs.map((faq, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-6 py-4 text-left hover:bg-gray-50 transition-colors"
+                >
+                  <span className="font-medium text-gray-900">{faq.question}</span>
+                  {openFaq === i ? (
+                    <ChevronUp className="w-4 h-4 text-gray-400 shrink-0 ml-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-400 shrink-0 ml-4" />
+                  )}
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-5 text-sm text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

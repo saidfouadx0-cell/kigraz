@@ -38,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getBlogPostBySlug(slug);
+  const post = (await getBlogPostBySlug(slug)) ?? mockBlogPosts.find((p) => p.slug === slug) ?? null;
   if (!post) notFound();
 
   const jsonLd = {
@@ -94,10 +94,14 @@ export default async function BlogPostPage({ params }: Props) {
           <p className="text-lg text-gray-600 leading-relaxed mb-8">{post.excerpt}</p>
 
           <div className="prose prose-blue max-w-none text-gray-600">
-            <p>
-              Dieser Artikel wird in Kürze vollständig verfügbar sein. Melden Sie sich für unseren
-              Newsletter an, um benachrichtigt zu werden.
-            </p>
+            {post.content ? (
+              <div dangerouslySetInnerHTML={{ __html: post.content }} />
+            ) : (
+              <p>
+                Dieser Artikel wird in Kürze vollständig verfügbar sein. Melden Sie sich für unseren
+                Newsletter an, um benachrichtigt zu werden.
+              </p>
+            )}
           </div>
         </article>
       </div>
